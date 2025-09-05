@@ -18,10 +18,16 @@ class Traffic_Portal_API {
     private $api_base_url;
     
     /**
+     * API key
+     */
+    private $api_key;
+    
+    /**
      * Constructor
      */
     public function __construct() {
         $this->api_base_url = TPLS_API_BASE_URL;
+        $this->api_key = TPLS_API_KEY;
         
         add_action('rest_api_init', array($this, 'register_routes'));
         add_action('wp_ajax_tpls_validate_key', array($this, 'ajax_validate_key'));
@@ -250,12 +256,18 @@ class Traffic_Portal_API {
             'domain' => $domain,
         ));
         
+        $headers = array(
+            'Accept' => 'application/json',
+        );
+        
+        if (!empty($this->api_key)) {
+            $headers['Authorization'] = 'Bearer ' . $this->api_key;
+        }
+        
         $response = wp_remote_get($url, array(
             'timeout'    => 15,
             'user-agent' => 'WordPress-Traffic-Portal-Plugin/' . TPLS_VERSION,
-            'headers'    => array(
-                'Accept' => 'application/json',
-            ),
+            'headers'    => $headers,
         ));
         
         if (is_wp_error($response)) {
@@ -287,13 +299,19 @@ class Traffic_Portal_API {
             'status'      => 'active',
         );
         
+        $headers = array(
+            'Content-Type' => 'application/json',
+            'Accept'       => 'application/json',
+        );
+        
+        if (!empty($this->api_key)) {
+            $headers['Authorization'] = 'Bearer ' . $this->api_key;
+        }
+        
         $response = wp_remote_post($url, array(
             'timeout'    => 30,
             'user-agent' => 'WordPress-Traffic-Portal-Plugin/' . TPLS_VERSION,
-            'headers'    => array(
-                'Content-Type' => 'application/json',
-                'Accept'       => 'application/json',
-            ),
+            'headers'    => $headers,
             'body'       => wp_json_encode($body),
         ));
         
@@ -346,5 +364,12 @@ class Traffic_Portal_API {
      */
     public function set_user_traffic_portal_token(int $user_id, string $token): bool {
         return update_user_meta($user_id, 'traffic_portal_token', sanitize_text_field($token)) !== false;
+    }
+    
+    /**
+     * Get API key
+     */
+    public function get_api_key(): string {
+        return $this->api_key;
     }
 }

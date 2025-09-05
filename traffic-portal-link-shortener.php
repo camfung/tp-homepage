@@ -26,7 +26,8 @@ define('TPLS_VERSION', '1.0.0');
 define('TPLS_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('TPLS_PLUGIN_URL', plugin_dir_url(__FILE__));
 define('TPLS_PLUGIN_BASENAME', plugin_basename(__FILE__));
-define('TPLS_API_BASE_URL', 'https://dev.trfc.link');
+define('TPLS_API_BASE_URL', $_ENV['API_BASE_URL'] ?? 'https://dev.trfc.link');
+define('TPLS_API_KEY', $_ENV['API_KEY'] ?? '');
 
 /**
  * Main plugin class
@@ -218,6 +219,13 @@ class Traffic_Portal_Link_Shortener {
      */
     public function get_api_base_url(): string {
         return TPLS_API_BASE_URL;
+    }
+    
+    /**
+     * Get API key
+     */
+    public function get_api_key(): string {
+        return TPLS_API_KEY;
     }
 }
 

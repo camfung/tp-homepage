@@ -1,0 +1,383 @@
+/**
+ * Traffic Portal Link Shortener - Admin Styles
+ * WordPress admin dashboard enhancements
+ */
+
+/* Admin page header */
+.traffic-portal-admin-header {
+    background: linear-gradient(135deg, #2196f3 0%, #1976d2 100%);
+    color: white;
+    padding: 2rem;
+    margin: -10px -20px 20px -20px;
+    border-radius: 0 0 8px 8px;
+}
+
+.traffic-portal-admin-header h1 {
+    color: white;
+    font-size: 1.8rem;
+    margin-bottom: 0.5rem;
+}
+
+.traffic-portal-admin-header .description {
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 1rem;
+}
+
+/* Enhanced table styling */
+.wp-list-table.traffic-portal-links {
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.wp-list-table.traffic-portal-links thead th {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border-bottom: 2px solid #dee2e6;
+    color: #495057;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.85rem;
+    letter-spacing: 0.5px;
+}
+
+.wp-list-table.traffic-portal-links tbody tr {
+    transition: all 0.3s ease;
+}
+
+.wp-list-table.traffic-portal-links tbody tr:hover {
+    background-color: #f8f9fa;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Status badges */
+.status-badge {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border: 2px solid;
+    transition: all 0.3s ease;
+}
+
+.status-badge.status-active {
+    background: linear-gradient(135deg, #d4edda 0%, #c8e6c9 100%);
+    color: #155724;
+    border-color: #4caf50;
+}
+
+.status-badge.status-inactive {
+    background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%);
+    color: #721c24;
+    border-color: #f44336;
+}
+
+/* Action links */
+.row-actions {
+    margin-top: 8px;
+}
+
+.row-actions span {
+    margin-right: 8px;
+}
+
+.row-actions a {
+    color: #666;
+    text-decoration: none;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+    padding: 2px 4px;
+    border-radius: 3px;
+}
+
+.row-actions a:hover {
+    color: #0073aa;
+    background-color: rgba(0, 115, 170, 0.1);
+}
+
+.row-actions .delete a:hover {
+    color: #dc3545;
+    background-color: rgba(220, 53, 69, 0.1);
+}
+
+.row-actions .copy-link {
+    cursor: pointer;
+    color: #28a745 !important;
+}
+
+.row-actions .copy-link:hover {
+    color: #218838 !important;
+    background-color: rgba(40, 167, 69, 0.1);
+}
+
+.row-actions .copy-link.copied {
+    color: #0066cc !important;
+    font-weight: bold;
+}
+
+/* Short link styling */
+.tpkey {
+    font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+    font-weight: 700;
+    background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+    padding: 2px 6px;
+    border-radius: 4px;
+    color: #0d47a1;
+    font-size: 0.9em;
+}
+
+.destination-link {
+    color: #666 !important;
+    text-decoration: none !important;
+    font-size: 0.9rem;
+    word-break: break-word;
+}
+
+.destination-link:hover {
+    color: #0073aa !important;
+    text-decoration: underline !important;
+}
+
+/* Form styling */
+.form-table th {
+    font-weight: 600;
+    color: #333;
+    padding-left: 0;
+}
+
+.form-table td {
+    padding-top: 15px;
+    padding-bottom: 15px;
+}
+
+.form-table input[type="text"],
+.form-table select {
+    border: 2px solid #e0e0e0;
+    border-radius: 6px;
+    padding: 8px 12px;
+    font-size: 14px;
+    transition: border-color 0.3s ease;
+}
+
+.form-table input[type="text"]:focus,
+.form-table select:focus {
+    border-color: #2196f3;
+    box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.1);
+    outline: none;
+}
+
+/* Cards for settings sections */
+.card {
+    background: white;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+}
+
+.card h3 {
+    margin-top: 0;
+    color: #333;
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+.card p {
+    margin-bottom: 0.5rem;
+    line-height: 1.6;
+}
+
+.card code {
+    background: #f8f9fa;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+    color: #e91e63;
+    border: 1px solid #e9ecef;
+}
+
+/* No links message */
+.no-links-message {
+    text-align: center;
+    padding: 3rem 2rem;
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border: 2px dashed #dee2e6;
+    border-radius: 12px;
+    margin: 2rem 0;
+}
+
+.no-links-message h3 {
+    color: #666;
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+}
+
+.no-links-message p {
+    color: #777;
+    font-size: 1rem;
+    margin-bottom: 0.5rem;
+    line-height: 1.6;
+}
+
+.no-links-message code {
+    background: #2196f3;
+    color: white;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-weight: 600;
+}
+
+/* Stats styling */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+    margin: 2rem 0;
+}
+
+.stat-card {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    border-left: 4px solid #2196f3;
+}
+
+.stat-number {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #2196f3;
+    margin-bottom: 0.5rem;
+    display: block;
+}
+
+.stat-label {
+    color: #666;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Button enhancements */
+.button-primary {
+    background: linear-gradient(135deg, #2196f3 0%, #1976d2 100%);
+    border-color: #1976d2;
+    border-radius: 6px;
+    padding: 8px 16px;
+    font-weight: 600;
+    text-transform: none;
+    transition: all 0.3s ease;
+}
+
+.button-primary:hover {
+    background: linear-gradient(135deg, #1976d2 0%, #1565c0 100%);
+    border-color: #1565c0;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(33, 150, 243, 0.3);
+}
+
+.button-secondary {
+    border: 2px solid #6c757d;
+    color: #6c757d;
+    border-radius: 6px;
+    padding: 6px 14px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.button-secondary:hover {
+    background-color: #6c757d;
+    color: white;
+    transform: translateY(-1px);
+}
+
+/* Export buttons */
+.export-buttons {
+    margin: 1rem 0;
+    padding: 1rem;
+    background: #f8f9fa;
+    border-radius: 8px;
+    border: 1px solid #e9ecef;
+}
+
+.export-buttons .button {
+    margin-right: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+/* Loading states */
+.updating {
+    opacity: 0.7;
+    pointer-events: none;
+    background: linear-gradient(45deg, transparent 25%, rgba(255, 255, 255, 0.5) 25%, rgba(255, 255, 255, 0.5) 50%, transparent 50%, transparent 75%, rgba(255, 255, 255, 0.5) 75%);
+    background-size: 20px 20px;
+    animation: loading-stripe 1s linear infinite;
+}
+
+@keyframes loading-stripe {
+    0% { background-position: 0 0; }
+    100% { background-position: 20px 20px; }
+}
+
+/* Responsive design */
+@media screen and (max-width: 782px) {
+    .traffic-portal-admin-header {
+        margin: -10px -10px 20px -10px;
+        padding: 1.5rem;
+    }
+    
+    .stats-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+    
+    .form-table th,
+    .form-table td {
+        display: block;
+        width: 100%;
+        padding-left: 0;
+        padding-right: 0;
+    }
+    
+    .form-table th {
+        padding-bottom: 5px;
+    }
+    
+    .export-buttons {
+        text-align: center;
+    }
+    
+    .export-buttons .button {
+        display: block;
+        width: 100%;
+        margin-right: 0;
+    }
+}
+
+/* Notice enhancements */
+.notice.traffic-portal-notice {
+    border-left: 4px solid #2196f3;
+    border-radius: 0 4px 4px 0;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.notice.traffic-portal-notice.notice-success {
+    border-left-color: #4caf50;
+    background: linear-gradient(90deg, rgba(76, 175, 80, 0.1) 0%, rgba(76, 175, 80, 0.05) 100%);
+}
+
+.notice.traffic-portal-notice.notice-error {
+    border-left-color: #f44336;
+    background: linear-gradient(90deg, rgba(244, 67, 54, 0.1) 0%, rgba(244, 67, 54, 0.05) 100%);
+}
+
+/* Menu icon styling */
+#adminmenu .dashicons-admin-links:before {
+    content: "\f103";
+    color: #82878c;
+}

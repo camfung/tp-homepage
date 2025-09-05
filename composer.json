@@ -1,0 +1,33 @@
+{
+    "name": "traffic-portal/link-shortener",
+    "description": "WordPress plugin for Traffic Portal link shortening integration",
+    "type": "wordpress-plugin",
+    "license": "GPL-2.0-or-later",
+    "authors": [
+        {
+            "name": "Traffic Portal Team",
+            "email": "support@trafficportal.dev"
+        }
+    ],
+    "require": {
+        "php": ">=8.2"
+    },
+    "require-dev": {
+        "wp-coding-standards/wpcs": "^3.0",
+        "phpunit/phpunit": "^10.0",
+        "squizlabs/php_codesniffer": "^3.7"
+    },
+    "scripts": {
+        "phpcs": "phpcs --standard=WordPress-Extra --extensions=php --colors -s .",
+        "phpcbf": "phpcbf --standard=WordPress-Extra --extensions=php .",
+        "test": "phpunit tests/",
+        "install-codestandards": [
+            "Dealerdirect\\Composer\\Plugin\\Installers\\PHPCodeSniffer\\Plugin::run"
+        ]
+    },
+    "config": {
+        "allow-plugins": {
+            "dealerdirect/phpcodesniffer-composer-installer": true
+        }
+    }
+}

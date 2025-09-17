@@ -48,10 +48,6 @@ class Traffic_Portal_Shortcode {
         // Enqueue assets
         $this->assets->enqueue_shortcode_assets();
         
-        // Check if user is logged in
-        $is_logged_in = is_user_logged_in();
-        $current_user = wp_get_current_user();
-        
         ob_start();
         ?>
         <div class="traffic-portal-container" data-theme="<?php echo esc_attr($atts['theme']); ?>">
@@ -64,22 +60,6 @@ class Traffic_Portal_Shortcode {
                     <?php esc_html_e('Choose a short, easy to remember word or generate a random combination of letters. Provide the destination. No registration needed!', 'traffic-portal-link-shortener'); ?>
                 </p>
             </div>
-            
-            <?php if (!$is_logged_in): ?>
-                <div class="traffic-portal-auth-notice">
-                    <div class="alert alert-info">
-                        <p><?php esc_html_e('Please log in to create short links.', 'traffic-portal-link-shortener'); ?></p>
-                        <div class="auth-buttons">
-                            <a href="<?php echo esc_url(wp_login_url(get_permalink())); ?>" class="btn btn-primary btn-sm">
-                                <?php esc_html_e('Login', 'traffic-portal-link-shortener'); ?>
-                            </a>
-                            <a href="<?php echo esc_url(wp_registration_url()); ?>" class="btn btn-outline-primary btn-sm">
-                                <?php esc_html_e('Register', 'traffic-portal-link-shortener'); ?>
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            <?php else: ?>
                 <form id="traffic-portal-form" class="traffic-portal-form">
                     <div class="row">
                         <div class="col-md-4">
@@ -166,15 +146,9 @@ class Traffic_Portal_Shortcode {
                 
                 <div class="traffic-portal-stats mt-4">
                     <p class="text-muted text-center">
-                        <?php 
-                        printf(
-                            esc_html__('Welcome back, %s! You can create unlimited short links.', 'traffic-portal-link-shortener'),
-                            '<strong>' . esc_html($current_user->display_name) . '</strong>'
-                        ); 
-                        ?>
+                        <?php esc_html_e('Create unlimited short links - no registration required!', 'traffic-portal-link-shortener'); ?>
                     </p>
                 </div>
-            <?php endif; ?>
         </div>
         <?php
         

@@ -82,7 +82,7 @@ class Traffic_Portal_API {
      * Check if user has permission to use API
      */
     public function check_user_permission(): bool {
-        return is_user_logged_in();
+        return true; // Allow all users, no login required
     }
     
     /**
@@ -124,21 +124,14 @@ class Traffic_Portal_API {
      * REST API endpoint to create link
      */
     public function create_link_endpoint(WP_REST_Request $request): WP_REST_Response {
-        $user_id = get_current_user_id();
+        $user_id = get_current_user_id() ?: 0; // Default to 0 for anonymous users
         $tpkey = $request->get_param('tpkey');
         $destination = $request->get_param('destination');
         $domain = $request->get_param('domain') ?: 'trfc.link';
-        
-        // Get user token (this would need to be implemented based on user meta or options)
+
+        // Use default token for anonymous users
         $user_token = $this->get_user_traffic_portal_token($user_id);
-        
-        if (!$user_token) {
-            return new WP_REST_Response(array(
-                'success' => false,
-                'message' => 'User not authenticated with Traffic Portal. Please register or link your account.',
-            ), 401);
-        }
-        
+
         // Call Traffic Portal API
         $api_response = $this->call_create_api($user_id, $user_token, $tpkey, $domain, $destination);
         
@@ -172,9 +165,7 @@ class Traffic_Portal_API {
             wp_die(json_encode(array('success' => false, 'message' => 'Security check failed')));
         }
         
-        if (!is_user_logged_in()) {
-            wp_die(json_encode(array('success' => false, 'message' => 'Please log in first')));
-        }
+        // Removed login requirement - allow all users
         
         $tpkey = isset($_POST['tpkey']) ? sanitize_text_field($_POST['tpkey']) : '';
         $domain = isset($_POST['domain']) ? sanitize_text_field($_POST['domain']) : 'trfc.link';
@@ -201,30 +192,24 @@ class Traffic_Portal_API {
             wp_die(json_encode(array('success' => false, 'message' => 'Security check failed')));
         }
         
-        if (!is_user_logged_in()) {
-            wp_die(json_encode(array('success' => false, 'message' => 'Please log in first')));
-        }
+        // Removed login requirement - allow all users
         
-        $user_id = get_current_user_id();
+        $user_id = get_current_user_id() ?: 0; // Default to 0 for anonymous users
         $tpkey = isset($_POST['tpkey']) ? sanitize_text_field($_POST['tpkey']) : '';
         $destination = isset($_POST['destination']) ? esc_url_raw($_POST['destination']) : '';
         $domain = isset($_POST['domain']) ? sanitize_text_field($_POST['domain']) : 'trfc.link';
-        
+
         // Validation
         if (empty($tpkey) || !$this->validate_key_format($tpkey)) {
             wp_die(json_encode(array('success' => false, 'message' => 'Invalid key format')));
         }
-        
+
         if (empty($destination) || !$this->validate_url($destination)) {
             wp_die(json_encode(array('success' => false, 'message' => 'Invalid destination URL')));
         }
-        
-        // Get user token
+
+        // Get user token (will provide default for anonymous users)
         $user_token = $this->get_user_traffic_portal_token($user_id);
-        
-        if (!$user_token) {
-            wp_die(json_encode(array('success' => false, 'message' => 'User not authenticated with Traffic Portal')));
-        }
         
         // Create link via API
         $response = $this->call_create_api($user_id, $user_token, $tpkey, $domain, $destination);
@@ -385,24 +370,29 @@ class Traffic_Portal_API {
      * Get user's Traffic Portal token
      * This should be implemented based on how user tokens are stored
      */
-    private function get_user_traffic_portal_token(int $user_id): ?string {
-        // For now, return a placeholder. This would need to be implemented
-        // based on how users authenticate with Traffic Portal
+    private function get_user_traffic_portal_token(int $user_id): string {
+        // For anonymous users (user_id = 0), use default token
+        if ($user_id === 0) {
+            return 'MkmFJGQJlCyAuFWkkIiG'; // Default token from tmp.php for anonymous users
+        }
+
+        // For logged-in users, try to get existing token
         $token = get_user_meta($user_id, 'traffic_portal_token', true);
-        
-        // If no token exists, could generate a temporary one or require registration
+
+        // If no token exists, generate one
         if (empty($token)) {
-            // For demo purposes, generate a basic token from user data
             $user = get_userdata($user_id);
             if ($user) {
-                // This is a simplified token generation - in production,
-                // this should integrate with Traffic Portal's auth system
+                // Generate token based on user data
                 $token = 'wp_' . $user->user_login . '_' . $user_id;
                 update_user_meta($user_id, 'traffic_portal_token', $token);
+            } else {
+                // Fallback to default token if user not found
+                $token = 'MkmFJGQJlCyAuFWkkIiG';
             }
         }
-        
-        return $token ?: null;
+
+        return $token;
     }
     
     /**

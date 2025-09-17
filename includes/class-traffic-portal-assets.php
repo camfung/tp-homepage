@@ -144,7 +144,7 @@ class Traffic_Portal_Assets {
     public function get_inline_css(): string {
         return '
         .traffic-portal-container {
-            max-width: 800px;
+            width: 85%;
             margin: 2rem auto;
             padding: 2rem;
             background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);

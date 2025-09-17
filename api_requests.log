@@ -14,3 +14,9 @@
 [2025-09-17 00:33:19] Response Code: 200 | Response Body: {"keystatus": "not exists", "message": "Domain-key pair does not exist.", "source": null, "success": true}
 [2025-09-17 00:33:19] Sending POST request to: https://dev.trfc.link/items | Payload: {"uid":125,"tpTkn":"MkmFJGQJlCyAuFWkkIiG","tpKey":"abc123","domain":"dev.trfc.link","destination":"https:\/\/example.com\/landing","status":"active"}
 [2025-09-17 00:33:20] Response Code: 502 | Response Body: {"message": "Error Message: 'cache_content'", "source": null, "success": false}
+[2025-09-17 00:54:19] Sending GET request to: https://dev.trfc.link/items/validate?tpkey=abc123&domain=trafficportal.dev
+[2025-09-17 00:54:20] Response Code: 200 | Response Body: {"keystatus": "not exists", "message": "Domain-key pair does not exist.", "source": null, "success": true}
+[2025-09-17 00:54:20] Sending POST request to: https://dev.trfc.link/items | Payload: {"uid":125,"tpTkn":"MkmFJGQJlCyAuFWkkIiG","tpKey":"abc123","domain":"dev.trfc.link","destination":"https:\/\/example.com\/landing","status":"active"}
+[2025-09-17 00:54:22] Response Code: 502 | Response Body: {"message": "Error Message: 'cache_content'", "source": null, "success": false}
+[2025-09-17 00:54:22] Sending GET request to: https://dev.trfc.link/items/validate?tpkey=abc123&domain=trafficportal.dev
+[2025-09-17 00:54:22] Response Code: 200 | Response Body: {"keystatus": "not exists", "message": "Domain-key pair does not exist.", "source": null, "success": true}

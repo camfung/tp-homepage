@@ -21,7 +21,9 @@
             isValidating: false,
             isCreating: false,
             lastValidatedKey: null,
-            keyAvailable: false
+            keyAvailable: false,
+            retryCount: 0,
+            maxRetries: 2
         },
 
         // DOM elements cache
@@ -329,14 +331,18 @@
                     xhr.setRequestHeader('X-WP-Nonce', tpls_ajax.nonce);
                 },
                 success: function(response) {
+                    // Reset retry count and state on success
+                    self.state.retryCount = 0;
+                    self.state.isCreating = false;
+                    self.setLoadingState(false);
                     self.handleCreateResponse(response, formData);
                 },
                 error: function(xhr) {
-                    self.handleCreateError(xhr);
+                    self.handleCreateError(xhr, formData);
                 },
                 complete: function() {
-                    self.state.isCreating = false;
-                    self.setLoadingState(false);
+                    // State reset is handled in success/error handlers
+                    // to properly handle retries
                 }
             });
         },
@@ -345,12 +351,49 @@
          * Handle create link response
          */
         handleCreateResponse: function(response, formData) {
+            // Log response for debugging
+            console.log('Create link response:', response);
+
             if (response && response.success) {
                 const shortUrl = `https://${formData.domain}/${formData.tpkey}`;
                 this.showSuccessResult(shortUrl);
                 this.resetForm();
             } else {
-                const message = response && response.message ? response.message : tpls_ajax.messages.error_generic;
+                let message = tpls_ajax.messages.error_generic;
+                let shouldRetry = false;
+
+                if (response && response.message) {
+                    message = response.message;
+
+                    // Handle specific API error messages
+                    if (message.includes('cache_content')) {
+                        shouldRetry = true;
+                        message = 'The service is experiencing temporary issues. Please try again in a few moments.';
+                    } else if (message.toLowerCase().includes('forbidden')) {
+                        message = 'Access denied. Please check your permissions or try logging in again.';
+                    }
+                }
+
+                // Retry logic for response-level errors
+                if (shouldRetry && this.state.retryCount < this.state.maxRetries) {
+                    this.state.retryCount++;
+                    console.log(`Retrying due to response error (attempt ${this.state.retryCount}/${this.state.maxRetries})`);
+
+                    // Show retry message
+                    this.showResult('info', `Retrying... (attempt ${this.state.retryCount}/${this.state.maxRetries})`);
+
+                    // Retry after a delay
+                    setTimeout(() => {
+                        this.state.isCreating = false;
+                        this.createShortLink(formData);
+                    }, 2000);
+
+                    return;
+                }
+
+                // Reset retry count if not retrying
+                this.state.retryCount = 0;
+
                 this.showResult('error', message);
             }
         },
@@ -358,15 +401,57 @@
         /**
          * Handle create link error
          */
-        handleCreateError: function(xhr) {
+        handleCreateError: function(xhr, formData) {
             let message = tpls_ajax.messages.error_generic;
-            
+            let shouldRetry = false;
+
+            // Log error details for debugging
+            console.error('Form submission error:', xhr);
+
             if (xhr.status === 401) {
                 message = tpls_ajax.messages.login_required;
+            } else if (xhr.status === 403) {
+                message = 'Access denied. Please check your permissions or try logging in again.';
+            } else if (xhr.status === 502 || xhr.status === 503) {
+                shouldRetry = true;
+                message = 'The service is temporarily unavailable. Please try again in a few moments.';
+            } else if (xhr.status === 500) {
+                message = 'Server error occurred. Please try again or contact support if the problem persists.';
             } else if (xhr.responseJSON && xhr.responseJSON.message) {
                 message = xhr.responseJSON.message;
+
+                // Check if this is a retryable error
+                if (message.includes('cache_content')) {
+                    shouldRetry = true;
+                }
+            } else if (xhr.status === 0) {
+                shouldRetry = true;
+                message = 'Network error. Please check your internet connection and try again.';
             }
-            
+
+            // Retry logic for temporary failures
+            if (shouldRetry && this.state.retryCount < this.state.maxRetries) {
+                this.state.retryCount++;
+                console.log(`Retrying request (attempt ${this.state.retryCount}/${this.state.maxRetries})`);
+
+                // Show retry message
+                this.showResult('info', `Retrying... (attempt ${this.state.retryCount}/${this.state.maxRetries})`);
+
+                // Retry after a delay - don't reset isCreating state
+                setTimeout(() => {
+                    // Reset state before retry
+                    this.state.isCreating = false;
+                    this.createShortLink(formData);
+                }, 2000);
+
+                return;
+            }
+
+            // Reset retry count and state
+            this.state.retryCount = 0;
+            this.state.isCreating = false;
+            this.setLoadingState(false);
+
             this.showResult('error', message);
         },
 

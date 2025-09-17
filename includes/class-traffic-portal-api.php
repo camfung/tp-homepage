@@ -11,12 +11,12 @@ if (!defined('ABSPATH')) {
  * API proxy handler for Traffic Portal Link Shortener
  */
 class Traffic_Portal_API {
-    
+
     /**
      * API base URL
      */
     private $api_base_url;
-    
+
     /**
      * API key
      */
@@ -248,91 +248,137 @@ class Traffic_Portal_API {
     }
     
     /**
+     * Log message to file
+     */
+    private function logMessage(string $message): void {
+        $logFile = plugin_dir_path(__FILE__) . '../api_requests.log';
+        $date = date('Y-m-d H:i:s');
+        file_put_contents($logFile, "[$date] $message\n", FILE_APPEND | LOCK_EX);
+    }
+
+    /**
+     * Validate item using cURL (from tmp.php)
+     */
+    private function validateItem(string $tpkey, string $domain, string $apiKey): array {
+        $url = "https://dev.trfc.link/items/validate?tpkey=" . urlencode($tpkey) . "&domain=" . urlencode($domain);
+        $this->logMessage("Sending GET request to: $url");
+
+        $ch = curl_init($url);
+
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, [
+            "x-api-key: $apiKey"
+        ]);
+
+        $response = curl_exec($ch);
+
+        if (curl_errno($ch)) {
+            $error = curl_error($ch);
+            $this->logMessage("cURL Error: $error");
+            throw new Exception('Request Error: ' . $error);
+        }
+
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+
+        $this->logMessage("Response Code: $httpCode | Response Body: $response");
+
+        return [
+            'status' => $httpCode,
+            'body' => $response
+        ];
+    }
+
+    /**
      * Call Traffic Portal validate API
      */
     private function call_validate_api(string $tpkey, string $domain) {
-        $url = $this->api_base_url . '/items/validate?' . http_build_query(array(
-            'tpkey'  => $tpkey,
-            'domain' => $domain,
-        ));
-        
-        $headers = array(
-            'Accept' => 'application/json',
-        );
-        
-        if (!empty($this->api_key)) {
-            $headers['Authorization'] = 'Bearer ' . $this->api_key;
+        try {
+            $result = $this->validateItem($tpkey, $domain, $this->api_key);
+
+            // Parse the response body
+            $data = json_decode($result['body'], true);
+
+            if (json_last_error() !== JSON_ERROR_NONE) {
+                return new WP_Error('json_error', 'Invalid JSON response from API');
+            }
+
+            // Check HTTP status code
+            if ($result['status'] !== 200) {
+                $error_message = isset($data['message']) ? $data['message'] : 'API request failed';
+                return new WP_Error('api_error', $error_message);
+            }
+
+            return $data;
+
+        } catch (Exception $e) {
+            return new WP_Error('curl_error', $e->getMessage());
         }
-        
-        $response = wp_remote_get($url, array(
-            'timeout'    => 15,
-            'user-agent' => 'WordPress-Traffic-Portal-Plugin/' . TPLS_VERSION,
-            'headers'    => $headers,
-        ));
-        
-        if (is_wp_error($response)) {
-            return $response;
-        }
-        
-        $body = wp_remote_retrieve_body($response);
-        $data = json_decode($body, true);
-        
-        if (json_last_error() !== JSON_ERROR_NONE) {
-            return new WP_Error('json_error', 'Invalid JSON response from API');
-        }
-        
-        return $data;
     }
     
+    /**
+     * Create masked record using cURL (from tmp.php)
+     */
+    private function createMaskedRecord(string $apiKey, int $uid, string $tpTkn, string $tpKey, string $domain, string $destination, string $status = "active"): array {
+        $url = "https://dev.trfc.link/items";
+        $payload = json_encode([
+            "uid" => $uid,
+            "tpTkn" => $tpTkn,
+            "tpKey" => $tpKey,
+            "domain" => $domain,
+            "destination" => $destination,
+            "status" => $status
+        ]);
+
+        $this->logMessage("Sending POST request to: $url | Payload: $payload");
+
+        $ch = curl_init($url);
+
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, [
+            "Content-Type: application/json",
+            "x-api-key: $apiKey"
+        ]);
+
+        $response = curl_exec($ch);
+
+        if (curl_errno($ch)) {
+            $error = curl_error($ch);
+            $this->logMessage("cURL Error: $error");
+            throw new Exception('Request Error: ' . $error);
+        }
+
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+
+        $this->logMessage("Response Code: $httpCode | Response Body: $response");
+
+        return [
+            'status' => $httpCode,
+            'body' => json_decode($response, true)
+        ];
+    }
+
     /**
      * Call Traffic Portal create API
      */
     private function call_create_api(int $user_id, string $user_token, string $tpkey, string $domain, string $destination) {
-        $url = $this->api_base_url . '/items';
-        
-        $body = array(
-            'uid'         => $user_id,
-            'tpTkn'       => $user_token,
-            'tpKey'       => $tpkey,
-            'domain'      => $domain,
-            'destination' => $destination,
-            'status'      => 'active',
-        );
-        
-        $headers = array(
-            'Content-Type' => 'application/json',
-            'Accept'       => 'application/json',
-        );
-        
-        if (!empty($this->api_key)) {
-            $headers['Authorization'] = 'Bearer ' . $this->api_key;
+        try {
+            $result = $this->createMaskedRecord($this->api_key, $user_id, $user_token, $tpkey, $domain, $destination);
+
+            // Check HTTP status code
+            if ($result['status'] !== 200) {
+                $error_message = isset($result['body']['message']) ? $result['body']['message'] : 'API request failed';
+                return new WP_Error('api_error', $error_message);
+            }
+
+            return $result['body'];
+
+        } catch (Exception $e) {
+            return new WP_Error('curl_error', $e->getMessage());
         }
-        
-        $response = wp_remote_post($url, array(
-            'timeout'    => 30,
-            'user-agent' => 'WordPress-Traffic-Portal-Plugin/' . TPLS_VERSION,
-            'headers'    => $headers,
-            'body'       => wp_json_encode($body),
-        ));
-        
-        if (is_wp_error($response)) {
-            return $response;
-        }
-        
-        $response_code = wp_remote_retrieve_response_code($response);
-        $body_content = wp_remote_retrieve_body($response);
-        $data = json_decode($body_content, true);
-        
-        if (json_last_error() !== JSON_ERROR_NONE) {
-            return new WP_Error('json_error', 'Invalid JSON response from API');
-        }
-        
-        if ($response_code !== 200) {
-            $error_message = isset($data['message']) ? $data['message'] : 'API request failed';
-            return new WP_Error('api_error', $error_message);
-        }
-        
-        return $data;
     }
     
     /**

@@ -48,9 +48,6 @@ class Traffic_Portal_Shortcode {
         // Enqueue assets
         $this->assets->enqueue_shortcode_assets();
         
-        // Add inline CSS
-        $this->add_inline_styles();
-        
         // Check if user is logged in
         $is_logged_in = is_user_logged_in();
         $current_user = wp_get_current_user();
@@ -184,70 +181,6 @@ class Traffic_Portal_Shortcode {
         return ob_get_clean();
     }
     
-    /**
-     * Add inline styles
-     */
-    private function add_inline_styles() {
-        $css = $this->assets->get_inline_css();
-        
-        // Additional shortcode-specific styles
-        $css .= '
-        .traffic-portal-auth-notice {
-            text-align: center;
-            margin: 2rem 0;
-        }
-        
-        .auth-buttons {
-            margin-top: 1rem;
-        }
-        
-        .auth-buttons .btn {
-            margin: 0 0.5rem;
-        }
-        
-        .input-group-text {
-            background-color: #f8f9fa;
-            border-color: #e0e0e0;
-            color: #666;
-        }
-        
-        .validation-feedback {
-            margin-top: 0.25rem;
-            font-size: 0.875rem;
-        }
-        
-        .validation-feedback.valid {
-            color: #28a745;
-        }
-        
-        .validation-feedback.invalid {
-            color: #dc3545;
-        }
-        
-        .copy-link {
-            margin-left: 1rem;
-            vertical-align: top;
-        }
-        
-        .traffic-portal-stats {
-            border-top: 1px solid #e0e0e0;
-            padding-top: 1.5rem;
-            margin-top: 2rem;
-        }
-        
-        @keyframes pulse {
-            0% { opacity: 1; }
-            50% { opacity: 0.5; }
-            100% { opacity: 1; }
-        }
-        
-        .loading {
-            animation: pulse 1.5s ease-in-out infinite;
-        }
-        ';
-        
-        wp_add_inline_style('traffic-portal-frontend', $css);
-    }
     
     /**
      * Generate a random key

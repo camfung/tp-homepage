@@ -138,14 +138,4 @@ class Traffic_Portal_Assets {
         ));
     }
     
-    /**
-     * Get inline CSS for Traffic Portal styling
-     */
-    public function get_inline_css(): string {
-        return '
-        .traffic-portal-container {
-            width: 85% !important;
-        }
-        ';
-    }
 }

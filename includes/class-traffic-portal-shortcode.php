@@ -18,16 +18,10 @@ class Traffic_Portal_Shortcode {
     private $assets;
     
     /**
-     * API handler instance
-     */
-    private $api;
-    
-    /**
      * Constructor
      */
-    public function __construct(Traffic_Portal_Assets $assets, Traffic_Portal_API $api) {
+    public function __construct(Traffic_Portal_Assets $assets) {
         $this->assets = $assets;
-        $this->api = $api;
         
         add_shortcode('traffic_portal', array($this, 'render_shortcode'));
     }
@@ -135,19 +129,23 @@ class Traffic_Portal_Shortcode {
                 <div id="traffic-portal-result" class="traffic-portal-result">
                     <div class="result-content"></div>
                     <div class="short-link-display" style="display: none;">
-                        <strong><?php esc_html_e('Your short link:', 'traffic-portal-link-shortener'); ?></strong><br>
-                        <a href="#" target="_blank" class="short-link-url"></a>
-                        <button type="button" class="btn btn-sm btn-outline-secondary copy-link" data-clipboard-target=".short-link-url">
-                            <i class="fas fa-copy" aria-hidden="true"></i>
-                            <?php esc_html_e('Copy', 'traffic-portal-link-shortener'); ?>
-                        </button>
+                        <div class="row">
+                            <div class="col-md-8">
+                                <strong><?php esc_html_e('Your short link:', 'traffic-portal-link-shortener'); ?></strong><br>
+                                <a href="#" target="_blank" class="short-link-url"></a>
+                                <button type="button" class="btn btn-sm btn-outline-secondary copy-link" data-clipboard-target=".short-link-url">
+                                    <i class="fas fa-copy" aria-hidden="true"></i>
+                                    <?php esc_html_e('Copy', 'traffic-portal-link-shortener'); ?>
+                                </button>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="qr-code-container text-center">
+                                    <small class="text-muted"><?php esc_html_e('Scan QR Code:', 'traffic-portal-link-shortener'); ?></small>
+                                    <div id="qr-code-display" class="mt-2"></div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                </div>
-                
-                <div class="traffic-portal-stats mt-4">
-                    <p class="text-muted text-center">
-                        <?php esc_html_e('Create unlimited short links - no registration required!', 'traffic-portal-link-shortener'); ?>
-                    </p>
                 </div>
         </div>
         <?php

@@ -8,6 +8,33 @@
     box-sizing: border-box;
 }
 
+/* QR Code Styles */
+.qr-code-container {
+    padding: 1rem;
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 8px;
+    margin-top: 1rem;
+}
+
+#qr-code-display {
+    max-width: 200px;
+    margin: 0 auto;
+}
+
+.qr-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: auto;
+}
+
+.qr-container canvas,
+.qr-container img {
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
 /* Main container matching trafficportal.dev design */
 .traffic-portal-container {
     width: 95%;

@@ -111,7 +111,7 @@ class Traffic_Portal_Link_Shortener {
         
         // Load shortcode handler
         require_once TPLS_PLUGIN_DIR . 'includes/class-traffic-portal-shortcode.php';
-        $this->shortcode = new Traffic_Portal_Shortcode($this->assets, $this->api);
+        $this->shortcode = new Traffic_Portal_Shortcode($this->assets);
         
         // Load admin interface if in admin
         if (is_admin()) {

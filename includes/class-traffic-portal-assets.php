@@ -40,6 +40,15 @@ class Traffic_Portal_Assets {
             '5.0.2',
             true
         );
+
+        // Register QRCode.js library
+        wp_register_script(
+            'qrcode-js',
+            'https://cdn.jsdelivr.net/npm/qrcodejs2@0.0.2/qrcode.min.js',
+            array(),
+            '0.0.2',
+            true
+        );
         
         // Register custom CSS
         wp_register_style(
@@ -53,7 +62,7 @@ class Traffic_Portal_Assets {
         wp_register_script(
             'traffic-portal-frontend',
             TPLS_PLUGIN_URL . 'assets/js/frontend.js',
-            array('jquery', 'bootstrap'),
+            array('jquery', 'bootstrap', 'qrcode-js'),
             TPLS_VERSION,
             true
         );
@@ -90,6 +99,7 @@ class Traffic_Portal_Assets {
         
         wp_enqueue_script('jquery');
         wp_enqueue_script('bootstrap');
+        wp_enqueue_script('qrcode-js');
         wp_enqueue_script('traffic-portal-frontend');
         
         // Localize script for AJAX

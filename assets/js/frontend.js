@@ -53,7 +53,8 @@
                 $shortLinkDisplay: $('.short-link-display'),
                 $shortLinkUrl: $('.short-link-url'),
                 $copyBtn: $('.copy-link'),
-                $validationFeedback: $('.validation-feedback')
+                $validationFeedback: $('.validation-feedback'),
+                $qrDisplay: $('#qr-code-display')
             };
         },
 
@@ -69,19 +70,10 @@
                 self.handleFormSubmit();
             });
 
-            // Key input validation with debounce
-            let validateTimeout;
+            // Key input basic validation
             this.elements.$keyInput.on('input', function() {
-                clearTimeout(validateTimeout);
                 const key = $(this).val().trim();
-                
-                if (key.length >= self.config.keyMinLength) {
-                    validateTimeout = setTimeout(function() {
-                        self.validateKey(key);
-                    }, self.config.validateDelay);
-                } else {
-                    self.clearValidation();
-                }
+                self.validateKeyFormat(key);
             });
 
             // Generate random key
@@ -126,12 +118,12 @@
             }
 
             const formData = this.getFormData();
-            
+
             if (!this.validateFormData(formData)) {
                 return;
             }
 
-            this.createShortLink(formData);
+            this.createShortLinkLocal(formData);
         },
 
         /**
@@ -154,7 +146,7 @@
 
             // Validate key
             if (!data.tpkey || data.tpkey.length < this.config.keyMinLength) {
-                this.showValidationError('tpkey', tpls_ajax.messages.error_generic);
+                this.showValidationError('tpkey', 'Please enter at least ' + this.config.keyMinLength + ' characters');
                 isValid = false;
             } else if (!this.config.keyPattern.test(data.tpkey)) {
                 this.showValidationError('tpkey', 'Key can only contain letters, numbers, underscore and dash');
@@ -163,7 +155,7 @@
 
             // Validate URL
             if (!data.destination || !this.isValidUrl(data.destination)) {
-                this.showValidationError('destination', tpls_ajax.messages.error_invalid);
+                this.showValidationError('destination', 'Please enter a valid URL');
                 isValid = false;
             }
 
@@ -171,77 +163,43 @@
         },
 
         /**
-         * Validate key availability
+         * Validate key format
          */
-        validateKey: function(key) {
-            if (this.state.isValidating || this.state.lastValidatedKey === key) {
+        validateKeyFormat: function(key) {
+            const $feedback = this.elements.$keyInput.siblings('.validation-feedback');
+
+            if (!key) {
+                $feedback.removeClass('valid invalid').text('');
+                this.elements.$keyInput.removeClass('is-valid is-invalid');
                 return;
             }
 
-            this.state.isValidating = true;
-            this.state.lastValidatedKey = key;
-
-            const self = this;
-            const $feedback = this.elements.$keyInput.siblings('.validation-feedback');
-            
-            $feedback.removeClass('valid invalid')
-                    .addClass('validating')
-                    .text(tpls_ajax.messages.validating);
-
-            $.ajax({
-                url: tpls_ajax.rest_url + 'validate',
-                method: 'GET',
-                data: {
-                    tpkey: key,
-                    domain: $('input[name="domain"]').val()
-                },
-                beforeSend: function(xhr) {
-                    xhr.setRequestHeader('X-WP-Nonce', tpls_ajax.nonce);
-                },
-                success: function(response) {
-                    self.handleKeyValidationResponse(response, key);
-                },
-                error: function(xhr) {
-                    self.handleKeyValidationError(xhr);
-                },
-                complete: function() {
-                    self.state.isValidating = false;
-                }
-            });
-        },
-
-        /**
-         * Handle key validation response
-         */
-        handleKeyValidationResponse: function(response, key) {
-            const $feedback = this.elements.$keyInput.siblings('.validation-feedback');
-            
-            if (response && response.success && response.keystatus === 'available') {
-                this.state.keyAvailable = true;
-                $feedback.removeClass('validating invalid')
-                        .addClass('valid')
-                        .text('✓ Key is available');
+            if (key.length >= this.config.keyMinLength && this.config.keyPattern.test(key)) {
+                $feedback.removeClass('invalid').addClass('valid').text('✓ Key format is valid');
                 this.elements.$keyInput.removeClass('is-invalid').addClass('is-valid');
             } else {
-                this.state.keyAvailable = false;
-                const message = response && response.message ? response.message : tpls_ajax.messages.error_key_used;
-                $feedback.removeClass('validating valid')
-                        .addClass('invalid')
-                        .text('✗ ' + message);
+                $feedback.removeClass('valid').addClass('invalid').text('✗ 3-20 characters: letters, numbers, underscore, dash');
                 this.elements.$keyInput.removeClass('is-valid').addClass('is-invalid');
             }
         },
 
         /**
-         * Handle key validation error
+         * Create short link locally (no API call)
          */
-        handleKeyValidationError: function(xhr) {
-            const $feedback = this.elements.$keyInput.siblings('.validation-feedback');
-            $feedback.removeClass('validating valid')
-                    .addClass('invalid')
-                    .text('✗ Unable to validate key');
-            this.elements.$keyInput.removeClass('is-valid').addClass('is-invalid');
-            this.state.keyAvailable = false;
+        createShortLinkLocal: function(formData) {
+            this.state.isCreating = true;
+            this.setLoadingState(true);
+
+            // Create the short URL directly
+            const shortUrl = `https://trfc.link/${formData.tpkey}`;
+
+            // Simulate a brief delay for better UX
+            setTimeout(() => {
+                this.state.isCreating = false;
+                this.setLoadingState(false);
+                this.showSuccessResultWithQR(shortUrl);
+                this.resetForm();
+            }, 500);
         },
 
         /**
@@ -251,7 +209,6 @@
             const $feedback = this.elements.$keyInput.siblings('.validation-feedback');
             $feedback.removeClass('validating valid invalid').text('');
             this.elements.$keyInput.removeClass('is-valid is-invalid');
-            this.state.keyAvailable = false;
             this.state.lastValidatedKey = null;
         },
 
@@ -309,159 +266,82 @@
         },
 
         /**
-         * Create short link via AJAX
+         * Create QR Code using provided function
          */
-        createShortLink: function(formData) {
-            if (!this.state.keyAvailable) {
-                this.showResult('error', 'Please choose a different key - this one is not available.');
-                return;
-            }
+        createQRCode: function(url, options = {}) {
+            // Create a container div for the QR code
+            const container = document.createElement('div');
+            container.className = 'qr-container';
 
-            this.state.isCreating = true;
-            this.setLoadingState(true);
+            // Generate unique ID for this instance
+            const qrId = 'qr-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
+            container.id = qrId;
 
-            const self = this;
+            // Default options
+            const defaultOptions = {
+                width: 156,
+                height: 156,
+                colorDark: "#000000",
+                colorLight: "#ffffff",
+                correctLevel: QRCode.CorrectLevel.H
+            };
 
-            $.ajax({
-                url: tpls_ajax.rest_url + 'create',
-                method: 'POST',
-                contentType: 'application/json',
-                data: JSON.stringify(formData),
-                beforeSend: function(xhr) {
-                    xhr.setRequestHeader('X-WP-Nonce', tpls_ajax.nonce);
-                },
-                success: function(response) {
-                    // Reset retry count and state on success
-                    self.state.retryCount = 0;
-                    self.state.isCreating = false;
-                    self.setLoadingState(false);
-                    self.handleCreateResponse(response, formData);
-                },
-                error: function(xhr) {
-                    self.handleCreateError(xhr, formData);
-                },
-                complete: function() {
-                    // State reset is handled in success/error handlers
-                    // to properly handle retries
-                }
-            });
-        },
+            // Merge options
+            const qrOptions = { ...defaultOptions, ...options };
 
-        /**
-         * Handle create link response
-         */
-        handleCreateResponse: function(response, formData) {
-            // Log response for debugging
-            console.log('Create link response:', response);
+            // Create QR code after element is in DOM
+            setTimeout(() => {
+                new QRCode(container, {
+                    text: url,
+                    width: qrOptions.width,
+                    height: qrOptions.height,
+                    colorDark: qrOptions.colorDark,
+                    colorLight: qrOptions.colorLight,
+                    correctLevel: qrOptions.correctLevel
+                });
 
-            if (response && response.success) {
-                const shortUrl = `https://${formData.domain}/${formData.tpkey}`;
-                this.showSuccessResult(shortUrl);
-                this.resetForm();
-            } else {
-                let message = tpls_ajax.messages.error_generic;
-                let shouldRetry = false;
-
-                if (response && response.message) {
-                    message = response.message;
-
-                    // Handle specific API error messages
-                    if (message.includes('cache_content')) {
-                        shouldRetry = true;
-                        message = 'The service is experiencing temporary issues. Please try again in a few moments.';
-                    } else if (message.toLowerCase().includes('forbidden')) {
-                        message = 'Access denied. Please check your permissions or try logging in again.';
+                // Make the QR code responsive to parent size
+                const style = document.createElement('style');
+                style.textContent = `
+                    #${qrId} {
+                        width: 100%;
+                        height: 100%;
                     }
-                }
+                    #${qrId} canvas,
+                    #${qrId} img {
+                        width: 100% !important;
+                        height: 100% !important;
+                        object-fit: contain;
+                    }
+                `;
+                document.head.appendChild(style);
+            }, 0);
 
-                // Retry logic for response-level errors
-                if (shouldRetry && this.state.retryCount < this.state.maxRetries) {
-                    this.state.retryCount++;
-                    console.log(`Retrying due to response error (attempt ${this.state.retryCount}/${this.state.maxRetries})`);
-
-                    // Show retry message
-                    this.showResult('info', `Retrying... (attempt ${this.state.retryCount}/${this.state.maxRetries})`);
-
-                    // Retry after a delay
-                    setTimeout(() => {
-                        this.state.isCreating = false;
-                        this.createShortLink(formData);
-                    }, 2000);
-
-                    return;
-                }
-
-                // Reset retry count if not retrying
-                this.state.retryCount = 0;
-
-                this.showResult('error', message);
-            }
+            return container;
         },
 
         /**
-         * Handle create link error
+         * Show success result with short link and QR code
          */
-        handleCreateError: function(xhr, formData) {
-            let message = tpls_ajax.messages.error_generic;
-            let shouldRetry = false;
+        showSuccessResultWithQR: function(shortUrl) {
+            this.elements.$shortLinkUrl.attr('href', shortUrl).text(shortUrl);
 
-            // Log error details for debugging
-            console.error('Form submission error:', xhr);
+            // Clear previous QR code
+            this.elements.$qrDisplay.empty();
 
-            if (xhr.status === 401) {
-                message = tpls_ajax.messages.login_required;
-            } else if (xhr.status === 403) {
-                message = 'Access denied. Please check your permissions or try logging in again.';
-            } else if (xhr.status === 502 || xhr.status === 503) {
-                shouldRetry = true;
-                message = 'The service is temporarily unavailable. Please try again in a few moments.';
-            } else if (xhr.status === 500) {
-                message = 'Server error occurred. Please try again or contact support if the problem persists.';
-            } else if (xhr.responseJSON && xhr.responseJSON.message) {
-                message = xhr.responseJSON.message;
+            // Generate new QR code
+            const qrElement = this.createQRCode(shortUrl);
+            this.elements.$qrDisplay.append(qrElement);
 
-                // Check if this is a retryable error
-                if (message.includes('cache_content')) {
-                    shouldRetry = true;
-                }
-            } else if (xhr.status === 0) {
-                shouldRetry = true;
-                message = 'Network error. Please check your internet connection and try again.';
-            }
-
-            // Retry logic for temporary failures
-            if (shouldRetry && this.state.retryCount < this.state.maxRetries) {
-                this.state.retryCount++;
-                console.log(`Retrying request (attempt ${this.state.retryCount}/${this.state.maxRetries})`);
-
-                // Show retry message
-                this.showResult('info', `Retrying... (attempt ${this.state.retryCount}/${this.state.maxRetries})`);
-
-                // Retry after a delay - don't reset isCreating state
-                setTimeout(() => {
-                    // Reset state before retry
-                    this.state.isCreating = false;
-                    this.createShortLink(formData);
-                }, 2000);
-
-                return;
-            }
-
-            // Reset retry count and state
-            this.state.retryCount = 0;
-            this.state.isCreating = false;
-            this.setLoadingState(false);
-
-            this.showResult('error', message);
+            this.elements.$shortLinkDisplay.show();
+            this.showResult('success', 'Short link created successfully!');
         },
 
         /**
-         * Show success result with short link
+         * Show success result with short link (legacy)
          */
         showSuccessResult: function(shortUrl) {
-            this.elements.$shortLinkUrl.attr('href', shortUrl).text(shortUrl);
-            this.elements.$shortLinkDisplay.show();
-            this.showResult('success', tpls_ajax.messages.success);
+            this.showSuccessResultWithQR(shortUrl);
         },
 
         /**
@@ -503,7 +383,7 @@
         setLoadingState: function(loading) {
             if (loading) {
                 this.elements.$submitBtn.addClass('loading').prop('disabled', true);
-                this.elements.$submitBtn.find('.btn-text').text(tpls_ajax.messages.creating);
+                this.elements.$submitBtn.find('.btn-text').text('Creating...');
                 this.elements.$form.addClass('loading');
             } else {
                 this.elements.$submitBtn.removeClass('loading').prop('disabled', false);

@@ -52,9 +52,11 @@
                 $resultContent: $('.result-content'),
                 $shortLinkDisplay: $('.short-link-display'),
                 $shortLinkUrl: $('.short-link-url'),
+                $shortLinkInput: $('.short-link-url-input'),
                 $copyBtn: $('.copy-link'),
                 $validationFeedback: $('.validation-feedback'),
-                $qrDisplay: $('#qr-code-display')
+                $qrDisplay: $('#qr-code-display'),
+                $qrSection: $('.qr-code-section')
             };
         },
 
@@ -307,6 +309,8 @@
          * Show success result with short link and QR code
          */
         showSuccessResultWithQR: function(shortUrl) {
+            // Update both the input field and the link
+            this.elements.$shortLinkInput.val(shortUrl);
             this.elements.$shortLinkUrl.attr('href', shortUrl).text(shortUrl);
 
             // Clear previous QR code
@@ -316,7 +320,10 @@
             const qrElement = this.createQRCode(shortUrl);
             this.elements.$qrDisplay.append(qrElement);
 
+            // Show both the link display and QR section
             this.elements.$shortLinkDisplay.show();
+            this.elements.$qrSection.show();
+
             this.showResult('success', 'Short link created successfully!');
         },
 
@@ -400,8 +407,8 @@
          * Copy link to clipboard
          */
         copyToClipboard: function() {
-            const url = this.elements.$shortLinkUrl.text();
-            
+            const url = this.elements.$shortLinkInput.val();
+
             if (navigator.clipboard && window.isSecureContext) {
                 // Use modern clipboard API
                 navigator.clipboard.writeText(url).then(() => {

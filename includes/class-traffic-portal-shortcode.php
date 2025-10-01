@@ -55,7 +55,46 @@ class Traffic_Portal_Shortcode {
                 </p>
             </div>
                 <form id="traffic-portal-form" class="traffic-portal-form">
-                    <div class="row">
+                    <!-- First Row: URL Input and Submit Button -->
+                    <div class="row mb-3">
+                        <div class="col-md-9">
+                            <div class="form-field-group">
+                                <label for="destination">
+                                    <?php esc_html_e('Destination URL', 'traffic-portal-link-shortener'); ?>
+                                </label>
+                                <div class="input-group">
+                                    <span class="input-group-text">
+                                        <i class="fas fa-globe" aria-hidden="true"></i>
+                                    </span>
+                                    <input
+                                        type="url"
+                                        id="destination"
+                                        name="destination"
+                                        class="form-control form-field-destination"
+                                        placeholder="<?php esc_attr_e('https://example.com/your-page', 'traffic-portal-link-shortener'); ?>"
+                                        required
+                                    >
+                                </div>
+                                <small class="form-text text-muted">
+                                    <?php esc_html_e('Enter the full URL where this short link should redirect', 'traffic-portal-link-shortener'); ?>
+                                </small>
+                                <div class="validation-feedback"></div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-3">
+                            <div class="form-field-group">
+                                <label>&nbsp;</label>
+                                <button type="submit" class="btn btn-save btn-primary w-100" id="save-link">
+                                    <i class="fas fa-save" aria-hidden="true"></i>
+                                    <span class="btn-text"><?php esc_html_e('Create Link', 'traffic-portal-link-shortener'); ?></span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Second Row: Code Input, Generated Link, and QR Code -->
+                    <div class="row" id="second-row">
                         <div class="col-md-4">
                             <div class="form-field-group">
                                 <label for="tpkey">
@@ -83,39 +122,35 @@ class Traffic_Portal_Shortcode {
                                 <div class="validation-feedback"></div>
                             </div>
                         </div>
-                        
-                        <div class="col-md-6">
-                            <div class="form-field-group">
-                                <label for="destination">
-                                    <?php esc_html_e('Destination URL', 'traffic-portal-link-shortener'); ?>
+
+                        <!-- Generated Link Display -->
+                        <div class="col-md-5">
+                            <div class="short-link-display" style="display: none;">
+                                <label class="form-label">
+                                    <?php esc_html_e('Your Short Link', 'traffic-portal-link-shortener'); ?>
                                 </label>
                                 <div class="input-group">
-                                    <span class="input-group-text">
-                                        <i class="fas fa-globe" aria-hidden="true"></i>
-                                    </span>
-                                    <input 
-                                        type="url" 
-                                        id="destination" 
-                                        name="destination" 
-                                        class="form-control form-field-destination" 
-                                        placeholder="<?php esc_attr_e('https://example.com/your-page', 'traffic-portal-link-shortener'); ?>"
-                                        required
-                                    >
+                                    <input type="text" class="form-control short-link-url-input" readonly>
+                                    <button type="button" class="btn btn-outline-secondary copy-link">
+                                        <i class="fas fa-copy" aria-hidden="true"></i>
+                                        <?php esc_html_e('Copy', 'traffic-portal-link-shortener'); ?>
+                                    </button>
                                 </div>
                                 <small class="form-text text-muted">
-                                    <?php esc_html_e('Enter the full URL where this short link should redirect', 'traffic-portal-link-shortener'); ?>
+                                    <a href="#" target="_blank" class="short-link-url"></a>
                                 </small>
-                                <div class="validation-feedback"></div>
                             </div>
                         </div>
-                        
-                        <div class="col-md-2">
-                            <div class="form-field-group">
-                                <label>&nbsp;</label>
-                                <button type="submit" class="btn btn-save btn-primary w-100" id="save-link">
-                                    <i class="fas fa-save" aria-hidden="true"></i>
-                                    <span class="btn-text"><?php esc_html_e('Save', 'traffic-portal-link-shortener'); ?></span>
-                                </button>
+
+                        <!-- QR Code Display -->
+                        <div class="col-md-3">
+                            <div class="qr-code-section" style="display: none;">
+                                <label class="form-label">
+                                    <?php esc_html_e('QR Code', 'traffic-portal-link-shortener'); ?>
+                                </label>
+                                <div class="qr-code-container">
+                                    <div id="qr-code-display"></div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -123,27 +158,9 @@ class Traffic_Portal_Shortcode {
                     <input type="hidden" name="domain" value="<?php echo esc_attr($atts['domain']); ?>">
                     <input type="hidden" name="nonce" value="<?php echo esc_attr(wp_create_nonce('tpls_shortcode_action')); ?>">
                 </form>
-                
-                <div id="traffic-portal-result" class="traffic-portal-result">
+
+                <div id="traffic-portal-result" class="traffic-portal-result mt-3">
                     <div class="result-content"></div>
-                    <div class="short-link-display" style="display: none;">
-                        <div class="row">
-                            <div class="col-md-8">
-                                <strong><?php esc_html_e('Your short link:', 'traffic-portal-link-shortener'); ?></strong><br>
-                                <a href="#" target="_blank" class="short-link-url"></a>
-                                <button type="button" class="btn btn-sm btn-outline-secondary copy-link" data-clipboard-target=".short-link-url">
-                                    <i class="fas fa-copy" aria-hidden="true"></i>
-                                    <?php esc_html_e('Copy', 'traffic-portal-link-shortener'); ?>
-                                </button>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="qr-code-container text-center">
-                                    <small class="text-muted"><?php esc_html_e('Scan QR Code:', 'traffic-portal-link-shortener'); ?></small>
-                                    <div id="qr-code-display" class="mt-2"></div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
                 </div>
         </div>
         <?php

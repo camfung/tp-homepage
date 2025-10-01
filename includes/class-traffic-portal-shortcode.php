@@ -65,14 +65,12 @@ class Traffic_Portal_Shortcode {
                                     <span class="input-group-text">
                                         <i class="fas fa-refresh" aria-hidden="true"></i>
                                     </span>
-                                    <input 
-                                        type="text" 
-                                        id="tpkey" 
-                                        name="tpkey" 
-                                        class="form-control form-field-tpkey" 
-                                        placeholder="<?php esc_attr_e('e.g., ruj41u', 'traffic-portal-link-shortener'); ?>"
-                                        pattern="[a-zA-Z0-9_-]{3,20}"
-                                        maxlength="20"
+                                    <input
+                                        type="text"
+                                        id="tpkey"
+                                        name="tpkey"
+                                        class="form-control form-field-tpkey"
+                                        placeholder="<?php esc_attr_e('e.g., educator', 'traffic-portal-link-shortener'); ?>"
                                         required
                                     >
                                     <button type="button" class="btn btn-outline-secondary" id="generate-key">
@@ -80,7 +78,7 @@ class Traffic_Portal_Shortcode {
                                     </button>
                                 </div>
                                 <small class="form-text text-muted">
-                                    <?php esc_html_e('3-20 characters: letters, numbers, underscore, dash', 'traffic-portal-link-shortener'); ?>
+                                    <?php esc_html_e('Enter any word or code for your short link', 'traffic-portal-link-shortener'); ?>
                                 </small>
                                 <div class="validation-feedback"></div>
                             </div>

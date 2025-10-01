@@ -70,10 +70,10 @@
                 self.handleFormSubmit();
             });
 
-            // Key input basic validation
+            // Key input - no validation needed
             this.elements.$keyInput.on('input', function() {
-                const key = $(this).val().trim();
-                self.validateKeyFormat(key);
+                // Clear any existing validation state
+                self.clearKeyValidation();
             });
 
             // Generate random key
@@ -144,12 +144,9 @@
         validateFormData: function(data) {
             let isValid = true;
 
-            // Validate key
-            if (!data.tpkey || data.tpkey.length < this.config.keyMinLength) {
-                this.showValidationError('tpkey', 'Please enter at least ' + this.config.keyMinLength + ' characters');
-                isValid = false;
-            } else if (!this.config.keyPattern.test(data.tpkey)) {
-                this.showValidationError('tpkey', 'Key can only contain letters, numbers, underscore and dash');
+            // Validate key - just check if it exists
+            if (!data.tpkey || data.tpkey.trim() === '') {
+                this.showValidationError('tpkey', 'Please enter a short code');
                 isValid = false;
             }
 
@@ -163,24 +160,12 @@
         },
 
         /**
-         * Validate key format
+         * Clear key validation state
          */
-        validateKeyFormat: function(key) {
+        clearKeyValidation: function() {
             const $feedback = this.elements.$keyInput.siblings('.validation-feedback');
-
-            if (!key) {
-                $feedback.removeClass('valid invalid').text('');
-                this.elements.$keyInput.removeClass('is-valid is-invalid');
-                return;
-            }
-
-            if (key.length >= this.config.keyMinLength && this.config.keyPattern.test(key)) {
-                $feedback.removeClass('invalid').addClass('valid').text('✓ Key format is valid');
-                this.elements.$keyInput.removeClass('is-invalid').addClass('is-valid');
-            } else {
-                $feedback.removeClass('valid').addClass('invalid').text('✗ 3-20 characters: letters, numbers, underscore, dash');
-                this.elements.$keyInput.removeClass('is-valid').addClass('is-invalid');
-            }
+            $feedback.removeClass('valid invalid').text('');
+            this.elements.$keyInput.removeClass('is-valid is-invalid');
         },
 
         /**
@@ -206,9 +191,7 @@
          * Clear validation state
          */
         clearValidation: function() {
-            const $feedback = this.elements.$keyInput.siblings('.validation-feedback');
-            $feedback.removeClass('validating valid invalid').text('');
-            this.elements.$keyInput.removeClass('is-valid is-invalid');
+            this.clearKeyValidation();
             this.state.lastValidatedKey = null;
         },
 

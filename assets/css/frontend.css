@@ -125,6 +125,16 @@
     margin-top: 0.25rem;
 }
 
+/* Custom flex layout for short code input */
+.d-flex.gap-2 {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.flex-grow-1 {
+    flex-grow: 1;
+}
+
 /* Main container - blue gradient design */
 .traffic-portal-container {
     max-width: 900px;

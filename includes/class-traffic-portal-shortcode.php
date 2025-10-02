@@ -100,18 +100,18 @@ class Traffic_Portal_Shortcode {
                                 <label for="tpkey">
                                     <?php esc_html_e('Custom Short Code', 'traffic-portal-link-shortener'); ?>
                                 </label>
-                                <div class="input-group">
+                                <div class="d-flex gap-2">
+                                    <button type="button" class="btn btn-outline-secondary" id="generate-key">
+                                        <i class="fas fa-dice" aria-hidden="true"></i>
+                                    </button>
                                     <input
                                         type="text"
                                         id="tpkey"
                                         name="tpkey"
-                                        class="form-control form-field-tpkey"
+                                        class="form-control form-field-tpkey flex-grow-1"
                                         placeholder="<?php esc_attr_e('e.g., educator', 'traffic-portal-link-shortener'); ?>"
                                         required
                                     >
-                                    <button type="button" class="btn btn-outline-secondary" id="generate-key">
-                                        <i class="fas fa-dice" aria-hidden="true"></i>
-                                    </button>
                                 </div>
                                 <small class="form-text text-muted">
                                     <?php esc_html_e('Enter any word or code for your short link', 'traffic-portal-link-shortener'); ?>

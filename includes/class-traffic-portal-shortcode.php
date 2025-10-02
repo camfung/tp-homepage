@@ -101,9 +101,6 @@ class Traffic_Portal_Shortcode {
                                     <?php esc_html_e('Custom Short Code', 'traffic-portal-link-shortener'); ?>
                                 </label>
                                 <div class="input-group">
-                                    <span class="input-group-text">
-                                        <i class="fas fa-refresh" aria-hidden="true"></i>
-                                    </span>
                                     <input
                                         type="text"
                                         id="tpkey"
